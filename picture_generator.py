@@ -6,13 +6,17 @@ import os
 
 def resource_path(relative_path):
     """ Get absolute path to resource, works for dev and for PyInstaller """
-    try:
-        # PyInstaller creates a temp folder and stores path in _MEIPASS
-        base_path = sys._MEIPASS
-    except Exception:
-        base_path = os.path.abspath("pnl_pictures")
+    run_in_debug_mode = True
+    if not run_in_debug_mode:
+        try:
+            # PyInstaller creates a temp folder and stores path in _MEIPASS
+            base_path = sys._MEIPASS
+        except Exception:
+            base_path = os.path.abspath("pnl_pictures")
 
-    return os.path.join(base_path, relative_path)
+        return os.path.join(base_path, relative_path)
+    else:
+        return relative_path
 
 def draw_pnl_picture(coin='BNBUSDT',
                      direction='Long',
@@ -24,20 +28,22 @@ def draw_pnl_picture(coin='BNBUSDT',
 
     im = Image.open(resource_path("./pnl_background.png"))
 
-    color_orange = (242, 97, 34)
+    color_orange = (255, 144, 0)
     color_cyan = (69, 197, 224)
 
     # Calculate Profit
     if 'ong' in direction:
+        p = 100 / entry_price * (exit_price - entry_price) * leverage
         if exit_price > entry_price:
-            profit = f'+{round((exit_price-entry_price)*leverage, 2)}%'
+            profit = f'+{round(p, 2)}%'
         else:
-            profit = f'{round((exit_price-entry_price)*leverage, 2)}%'
+            profit = f'{round(p, 2)}%'
     else:
+        p = 100 / entry_price * (entry_price - exit_price) * leverage
         if exit_price < entry_price:
-            profit = f'+{round((entry_price-exit_price)*leverage, 2)}%'
+            profit = f'+{round(p, 2)}%'
         else:
-            profit = f'{round((entry_price-exit_price)*leverage, 2)}%'
+            profit = f'{round(p, 2)}%'
 
     image_editable = ImageDraw.Draw(im)
 
